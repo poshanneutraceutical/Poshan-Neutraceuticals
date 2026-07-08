@@ -3,11 +3,15 @@ package com.ghoststrength.service;
 import com.ghoststrength.dto.CheckoutRequestDTO;
 import com.ghoststrength.dto.OrderDTO;
 import com.ghoststrength.dto.OrderItemDTO;
-import com.ghoststrength.entity.*;
+import com.ghoststrength.entity.Cart;
+import com.ghoststrength.entity.CartItem;
+import com.ghoststrength.entity.Order;
+import com.ghoststrength.entity.OrderItem;
 import com.ghoststrength.repository.CartRepository;
 import com.ghoststrength.repository.OrderRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,6 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderService {
 
     private final CartRepository cartRepository;
@@ -50,6 +55,7 @@ public class OrderService {
                 .orderDate(LocalDateTime.now())
                 .items(new ArrayList<>())
                 .build();
+
         // Copy Cart Items to Order Items
         for (CartItem cartItem : cart.getItems()) {
 
@@ -57,7 +63,7 @@ public class OrderService {
                     .order(order)
                     .productId(cartItem.getProduct().getId())
                     .productName(cartItem.getProduct().getName())
-                    .imageUrl(cartItem.getProduct().getImageUrl())
+
                     .price(cartItem.getProduct().getPrice())
                     .quantity(cartItem.getQuantity())
                     .subtotal(cartItem.getSubtotal())
@@ -69,14 +75,21 @@ public class OrderService {
         // Save Order
         Order savedOrder = orderRepository.save(order);
 
-        emailService.sendOrderConfirmation(savedOrder);
+        // Send confirmation email
+        try {
+            emailService.sendOrderConfirmation(savedOrder);
+        } catch (Exception e) {
+            log.error("Failed to send order confirmation email.", e);
+        }
 
+        // Clear Cart
         cart.getItems().clear();
         cart.setTotalAmount(BigDecimal.ZERO);
         cartRepository.save(cart);
 
         return convertToDTO(savedOrder);
     }
+
     /**
      * Convert Order Entity to DTO
      */
@@ -101,7 +114,6 @@ public class OrderService {
                                 .map(item -> OrderItemDTO.builder()
                                         .productId(item.getProductId())
                                         .productName(item.getProductName())
-                                        .imageUrl(item.getImageUrl())
                                         .price(item.getPrice())
                                         .quantity(item.getQuantity())
                                         .subtotal(item.getSubtotal())
@@ -110,5 +122,4 @@ public class OrderService {
                 )
                 .build();
     }
-
 }

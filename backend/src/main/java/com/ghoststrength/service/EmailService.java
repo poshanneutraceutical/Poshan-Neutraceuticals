@@ -3,13 +3,16 @@ package com.ghoststrength.service;
 import com.ghoststrength.entity.Order;
 import com.ghoststrength.entity.OrderItem;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.stereotype.Service;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmailService {
 
     private final JavaMailSender mailSender;
@@ -26,20 +29,30 @@ public class EmailService {
             String phone,
             String message) {
 
-        SimpleMailMessage mail = new SimpleMailMessage();
+        try {
 
-        mail.setTo(companyEmail);
+            SimpleMailMessage mail = new SimpleMailMessage();
 
-        mail.setSubject("New Contact Inquiry");
+            mail.setFrom(companyEmail);
+            mail.setTo(companyEmail);
+            mail.setSubject("New Contact Inquiry");
 
-        mail.setText(
-                "Name : " + name + "\n\n" +
-                        "Email : " + email + "\n\n" +
-                        "Phone : " + phone + "\n\n" +
-                        "Message :\n" + message
-        );
+            mail.setText(
+                    "Name : " + name + "\n\n" +
+                            "Email : " + email + "\n\n" +
+                            "Phone : " + phone + "\n\n" +
+                            "Message :\n" + message
+            );
 
-        mailSender.send(mail);
+            mailSender.send(mail);
+
+            log.info("Contact inquiry email sent successfully.");
+
+        } catch (Exception e) {
+
+            log.error("Failed to send contact email.", e);
+
+        }
     }
 
     /**
@@ -54,23 +67,33 @@ public class EmailService {
             String state,
             String message) {
 
-        SimpleMailMessage mail = new SimpleMailMessage();
+        try {
 
-        mail.setTo(companyEmail);
+            SimpleMailMessage mail = new SimpleMailMessage();
 
-        mail.setSubject("New Distributor Inquiry");
+            mail.setFrom(companyEmail);
+            mail.setTo(companyEmail);
+            mail.setSubject("New Distributor Inquiry");
 
-        mail.setText(
-                "Full Name : " + fullName + "\n\n" +
-                        "Email : " + email + "\n\n" +
-                        "Phone : " + phone + "\n\n" +
-                        "Business Name : " + businessName + "\n\n" +
-                        "City : " + city + "\n\n" +
-                        "State : " + state + "\n\n" +
-                        "Message :\n" + message
-        );
+            mail.setText(
+                    "Full Name : " + fullName + "\n\n" +
+                            "Email : " + email + "\n\n" +
+                            "Phone : " + phone + "\n\n" +
+                            "Business Name : " + businessName + "\n\n" +
+                            "City : " + city + "\n\n" +
+                            "State : " + state + "\n\n" +
+                            "Message :\n" + message
+            );
 
-        mailSender.send(mail);
+            mailSender.send(mail);
+
+            log.info("Distributor inquiry email sent successfully.");
+
+        } catch (Exception e) {
+
+            log.error("Failed to send distributor inquiry email.", e);
+
+        }
     }
 
     /**
@@ -79,82 +102,145 @@ public class EmailService {
     @Async
     public void sendOrderConfirmation(Order order) {
 
-        StringBuilder products = new StringBuilder();
+        try {
 
-        for (OrderItem item : order.getItems()) {
+            StringBuilder products = new StringBuilder();
 
-            products.append(item.getProductName())
-                    .append(" x ")
-                    .append(item.getQuantity())
-                    .append(" - ₹")
-                    .append(item.getSubtotal())
-                    .append("\n");
+            for (OrderItem item : order.getItems()) {
+
+                products.append("• ")
+                        .append(item.getProductName())
+                        .append(" x ")
+                        .append(item.getQuantity())
+                        .append("  -  ₹")
+                        .append(item.getSubtotal())
+                        .append("\n");
+
+            }
+
+            // =========================================
+            // Customer Email
+            // =========================================
+
+            SimpleMailMessage customerMail = new SimpleMailMessage();
+
+            customerMail.setFrom(companyEmail);
+            customerMail.setTo(order.getEmail());
+
+            customerMail.setSubject(
+                    "Ghost Strength - Order Confirmation #" + order.getId()
+            );
+
+            customerMail.setText(
+
+                    "Hello " + order.getCustomerName() + ",\n\n" +
+
+                            "Thank you for shopping with Ghost Strength.\n\n" +
+
+                            "Your order has been placed successfully.\n\n" +
+
+                            "=====================================\n" +
+                            "ORDER DETAILS\n" +
+                            "=====================================\n\n" +
+
+                            "Order ID : " + order.getId() + "\n" +
+                            "Order Status : " + order.getOrderStatus() + "\n" +
+                            "Payment Status : " + order.getPaymentStatus() + "\n\n" +
+
+                            "Products:\n\n" +
+
+                            products +
+
+                            "\n-------------------------------------\n" +
+
+                            "Total Amount : ₹" + order.getTotalAmount() +
+
+                            "\n-------------------------------------\n\n" +
+
+                            "Shipping Address:\n\n" +
+
+                            order.getAddress() + "\n" +
+                            order.getCity() + "\n" +
+                            order.getState() + " - " + order.getPincode() +
+
+                            "\n\nWe will notify you once your order has been shipped.\n\n" +
+
+                            "Thank you for choosing Ghost Strength.\n\n" +
+
+                            "Team Ghost Strength"
+
+            );
+
+            mailSender.send(customerMail);
+
+            // =========================================
+            // Company Email
+            // =========================================
+
+            SimpleMailMessage companyMail = new SimpleMailMessage();
+
+            companyMail.setFrom(companyEmail);
+            companyMail.setTo(companyEmail);
+
+            companyMail.setSubject(
+                    "New Order Received #" + order.getId()
+            );
+
+            companyMail.setText(
+
+                    "A new order has been placed.\n\n" +
+
+                            "=====================================\n" +
+
+                            "Customer Details\n" +
+
+                            "=====================================\n\n" +
+
+                            "Customer : " + order.getCustomerName() +
+
+                            "\nEmail : " + order.getEmail() +
+
+                            "\nPhone : " + order.getPhone() +
+
+                            "\n\nShipping Address:\n\n" +
+
+                            order.getAddress() + "\n" +
+
+                            order.getCity() + "\n" +
+
+                            order.getState() + " - " +
+
+                            order.getPincode() +
+
+                            "\n\n=====================================\n" +
+
+                            "Products\n" +
+
+                            "=====================================\n\n" +
+
+                            products +
+
+                            "\n-------------------------------------\n" +
+
+                            "Total Amount : ₹" + order.getTotalAmount()
+
+            );
+
+            mailSender.send(companyMail);
+
+            log.info(
+                    "Order confirmation emails sent successfully for Order ID {}",
+                    order.getId()
+            );
+
+        } catch (Exception e) {
+
+            log.error(
+                    "Failed to send order confirmation email for Order ID {}",
+                    order.getId(),
+                    e
+            );
+
         }
-
-        // Email to Customer
-        SimpleMailMessage customerMail = new SimpleMailMessage();
-
-        customerMail.setTo(order.getEmail());
-
-        customerMail.setSubject("GhostStrength - Order Confirmation");
-
-        customerMail.setText(
-                "Hello " + order.getCustomerName() + ",\n\n" +
-
-                        "Thank you for shopping with GhostStrength.\n\n" +
-
-                        "Order ID : " + order.getId() + "\n\n" +
-
-                        "Products:\n\n" +
-
-                        products +
-
-                        "\nTotal : ₹" + order.getTotalAmount() +
-
-                        "\n\nOrder Status : " + order.getOrderStatus() +
-
-                        "\nPayment Status : " + order.getPaymentStatus() +
-
-                        "\n\nWe'll notify you once your order is shipped."
-
-        );
-
-        mailSender.send(customerMail);
-
-        // Email to Company
-        SimpleMailMessage companyMail = new SimpleMailMessage();
-
-        companyMail.setTo(companyEmail);
-
-        companyMail.setSubject("New Order Received #" + order.getId());
-
-        companyMail.setText(
-
-                "Customer : " + order.getCustomerName() +
-
-                        "\nEmail : " + order.getEmail() +
-
-                        "\nPhone : " + order.getPhone() +
-
-                        "\n\nShipping Address:\n" +
-
-                        order.getAddress() + ", " +
-
-                        order.getCity() + ", " +
-
-                        order.getState() + " - " +
-
-                        order.getPincode() +
-
-                        "\n\nProducts:\n\n" +
-
-                        products +
-
-                        "\nTotal : ₹" + order.getTotalAmount()
-
-        );
-
-        mailSender.send(companyMail);
     }
-
 }

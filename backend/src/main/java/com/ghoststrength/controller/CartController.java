@@ -15,24 +15,49 @@ public class CartController {
 
     private final CartService cartService;
 
+
     /**
-     * Add Product to Cart
+     * Add product to cart
+     *
+     * Request:
+     * {
+     *   "customerId": "123",
+     *   "productId": 1,
+     *   "quantity": 2
+     * }
      */
     @PostMapping("/add")
-    public CartDTO addToCart(@Valid @RequestBody AddToCartRequest request) {
+    public CartDTO addToCart(
+            @Valid @RequestBody AddToCartRequest request) {
+
         return cartService.addToCart(request);
     }
 
+
+
     /**
-     * Get Customer Cart
+     * Get customer cart
+     *
+     * Response includes:
+     * - Product id
+     * - Product name
+     * - Product price
+     * - Quantity
+     * - Subtotal
+     *
+     * Images are loaded from frontend product.ts
      */
     @GetMapping("/{customerId}")
-    public CartDTO getCart(@PathVariable String customerId) {
+    public CartDTO getCart(
+            @PathVariable String customerId) {
+
         return cartService.getCart(customerId);
     }
 
+
+
     /**
-     * Update Product Quantity
+     * Update product quantity
      */
     @PutMapping("/{customerId}/{productId}")
     public CartDTO updateQuantity(
@@ -40,18 +65,26 @@ public class CartController {
             @PathVariable Long productId,
             @RequestParam Integer quantity) {
 
-        return cartService.updateQuantity(customerId, productId, quantity);
+        return cartService.updateQuantity(
+                customerId,
+                productId,
+                quantity
+        );
     }
 
+
+
     /**
-     * Remove Product from Cart
+     * Remove product from cart
      */
     @DeleteMapping("/{customerId}/{productId}")
     public CartDTO removeFromCart(
             @PathVariable String customerId,
             @PathVariable Long productId) {
 
-        return cartService.removeFromCart(customerId, productId);
+        return cartService.removeFromCart(
+                customerId,
+                productId
+        );
     }
-
 }

@@ -3,6 +3,7 @@ package com.ghoststrength.dto;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -16,7 +17,8 @@ public class CartDTO {
 
     private String customerId;
 
-    private List<CartItemDTO> items;
+    @Builder.Default
+    private List<CartItemDTO> items = new ArrayList<>();
 
     private BigDecimal totalAmount;
 }

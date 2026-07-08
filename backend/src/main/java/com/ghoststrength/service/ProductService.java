@@ -15,66 +15,139 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
+
     public List<ProductDTO> getAllProducts() {
-        return productRepository.findAllOrdered().stream()
+
+        return productRepository.findAllOrdered()
+                .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+
+
     public ProductDTO getProductById(Long id) {
+
         Product p = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found: " + id));
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Product not found: " + id
+                        ));
+
         return toDTO(p);
     }
 
+
+
     public ProductDTO createProduct(ProductDTO dto) {
+
         Product p = toEntity(dto);
+
         Product saved = productRepository.save(p);
+
         return toDTO(saved);
     }
 
-    public ProductDTO updateProduct(Long id, ProductDTO dto) {
+
+
+    public ProductDTO updateProduct(
+            Long id,
+            ProductDTO dto) {
+
+
         Product existing = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found: " + id));
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Product not found: " + id
+                        ));
+
+
         existing.setName(dto.getName());
+
         existing.setPrice(dto.getPrice());
+
         existing.setDescription(dto.getDescription());
+
         existing.setCategory(dto.getCategory());
-        existing.setImageUrl(dto.getImageUrl());
+
         existing.setBadge(dto.getBadge());
+
         existing.setFeatured(dto.getFeatured());
+
         existing.setInStock(dto.getInStock());
-        return toDTO(productRepository.save(existing));
+
+
+        return toDTO(
+                productRepository.save(existing)
+        );
     }
+
+
+
 
     public void deleteProduct(Long id) {
+
         productRepository.deleteById(id);
+
     }
 
+
+
+
+
     private ProductDTO toDTO(Product p) {
+
         return ProductDTO.builder()
+
                 .id(p.getId())
+
                 .name(p.getName())
+
                 .price(p.getPrice())
+
                 .description(p.getDescription())
+
                 .category(p.getCategory())
-                .imageUrl(p.getImageUrl())
+
                 .badge(p.getBadge())
+
                 .featured(p.getFeatured())
+
                 .inStock(p.getInStock())
+
                 .build();
     }
 
+
+
+
+
     private Product toEntity(ProductDTO dto) {
+
         return Product.builder()
+
                 .name(dto.getName())
+
                 .price(dto.getPrice())
+
                 .description(dto.getDescription())
+
                 .category(dto.getCategory())
-                .imageUrl(dto.getImageUrl())
+
                 .badge(dto.getBadge())
-                .featured(dto.getFeatured() != null ? dto.getFeatured() : false)
-                .inStock(dto.getInStock() != null ? dto.getInStock() : true)
+
+                .featured(
+                        dto.getFeatured() != null
+                                ? dto.getFeatured()
+                                : false
+                )
+
+                .inStock(
+                        dto.getInStock() != null
+                                ? dto.getInStock()
+                                : true
+                )
+
                 .build();
     }
 }

@@ -30,8 +30,7 @@ public class OrderItem {
     @Column(nullable = false)
     private String productName;
 
-    @Column(nullable = false)
-    private String imageUrl;
+
 
     @Column(nullable = false)
     private BigDecimal price;

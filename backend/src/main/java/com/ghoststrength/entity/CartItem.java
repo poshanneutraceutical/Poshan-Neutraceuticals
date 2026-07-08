@@ -18,19 +18,26 @@ public class CartItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     // Parent Cart
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)
     private Cart cart;
 
-    // Product
-    @ManyToOne(fetch = FetchType.LAZY)
+
+    // Product reference
+    // Product name and price are fetched from products table
+    // Images are handled by frontend using product id
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+
 
     @Column(nullable = false)
     private Integer quantity;
 
+
+    // quantity * product price
     @Column(nullable = false)
     private BigDecimal subtotal;
 }

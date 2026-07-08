@@ -1,55 +1,75 @@
+import React, { Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 import { FaWhatsapp } from "react-icons/fa";
 
+// --- COMPONENTS ---
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import Features from "./components/Features";
-import Products from "./components/Products";
+import Product from "./components/Product";
 import About from "./components/About";
 import Ticker from "./components/Ticker";
 import Distributor from "./components/Distributor";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import OrderSuccess from "./pages/OrderSuccess";
+// --- LAZY LOADED PAGES ---
+const Cart = lazy(() => import("./pages/Cart"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
 
+// --- PAGES ---
 function HomePage() {
   return (
     <div className="min-h-screen bg-black text-white">
       <Navbar />
-
       <main>
         <Hero />
         <Features />
-        <Products />
+        <Product />
         <About />
         <Ticker />
         <Distributor />
         <Contact />
       </main>
-
       <Footer />
     </div>
   );
 }
 
+// --- MAIN APP COMPONENT ---
 export default function App() {
   return (
     <>
       <Routes>
-        {/* Home */}
         <Route path="/" element={<HomePage />} />
 
-        {/* Cart */}
-        <Route path="/cart" element={<Cart />} />
+        <Route
+          path="/cart"
+          element={
+            <Suspense fallback={<div className="text-white text-center py-20 text-xl">Loading Cart...</div>}>
+              <Cart />
+            </Suspense>
+          }
+        />
 
-        {/* Checkout */}
-        <Route path="/checkout" element={<Checkout />} />
+        <Route
+          path="/checkout"
+          element={
+            <Suspense fallback={<div className="text-white text-center py-20 text-xl">Loading Checkout...</div>}>
+              <Checkout />
+            </Suspense>
+          }
+        />
 
-        {/* Order Success */}
-        <Route path="/order-success" element={<OrderSuccess />} />
+        <Route
+          path="/order-success"
+          element={
+            <Suspense fallback={<div className="text-white text-center py-20 text-xl">Loading...</div>}>
+              <OrderSuccess />
+            </Suspense>
+          }
+        />
       </Routes>
 
       {/* Floating WhatsApp Button */}
