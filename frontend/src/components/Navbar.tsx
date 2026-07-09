@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom'; // <--- ADDED THIS IMPORT
 import { Menu, X, ShoppingBag } from 'lucide-react';
 import CartIcon from '../components/CartIcon';
 
@@ -53,6 +54,14 @@ export default function Navbar() {
 
         {/* Desktop Right Side */}
         <div className="hidden md:flex items-center gap-4">
+          {/* NEW: Verify Product Link */}
+          <Link
+            to="/verify"
+            className="text-sm font-semibold text-white/80 hover:text-red-500 transition-colors"
+          >
+            Verify Product
+          </Link>
+
           <CartIcon />
 
           <button className="btn-primary flex items-center gap-2">
@@ -87,6 +96,17 @@ export default function Navbar() {
                 </a>
               </li>
             ))}
+
+            {/* NEW: Verify Product Link for Mobile */}
+            <li>
+              <Link
+                to="/verify"
+                className="nav-link block py-2"
+                onClick={() => setOpen(false)}
+              >
+                Verify Product
+              </Link>
+            </li>
 
             <li className="flex justify-center py-2">
               <CartIcon />

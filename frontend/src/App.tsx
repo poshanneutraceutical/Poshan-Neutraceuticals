@@ -13,6 +13,9 @@ import Distributor from "./components/Distributor";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 
+// --- VERIFY PAGE (Loaded instantly for fast QR scanning) ---
+import VerifyPage from "./pages/VerifyPage";
+
 // --- LAZY LOADED PAGES ---
 const Cart = lazy(() => import("./pages/Cart"));
 const Checkout = lazy(() => import("./pages/Checkout"));
@@ -43,6 +46,9 @@ export default function App() {
     <>
       <Routes>
         <Route path="/" element={<HomePage />} />
+
+        {/* NEW VERIFY ROUTE */}
+        <Route path="/verify" element={<VerifyPage />} />
 
         <Route
           path="/cart"
